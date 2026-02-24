@@ -30,7 +30,31 @@ export async function updateSession(request: NextRequest) {
   );
 
   // Refresh session if expired - required for Server Components
-  await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const { pathname } = request.nextUrl;
+
+  // Unauthenticated users cannot access dashboard routes
+  if (!user && pathname.startsWith("/dashboard")) {
+    const loginUrl = request.nextUrl.clone();
+    loginUrl.pathname = "/login";
+    return NextResponse.redirect(loginUrl);
+  }
+
+  // Authenticated users are redirected away from auth pages to their dashboard
+  if (user && (pathname === "/login" || pathname === "/register")) {
+    const { data: userData } = await supabase
+      .from("users")
+      .select("role")
+      .single();
+
+    const role = (userData?.role as string) ?? "customer";
+    const dashboardUrl = request.nextUrl.clone();
+    dashboardUrl.pathname = `/dashboard/${role}`;
+    return NextResponse.redirect(dashboardUrl);
+  }
 
   return supabaseResponse;
 }
