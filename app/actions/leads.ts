@@ -146,7 +146,22 @@ export async function getLeads(): Promise<
 
   if (leadsError) return { error: leadsError.message };
 
-  return { leads: (leads ?? []) as Lead[] };
+  const mapped: Lead[] = (leads ?? []).map((row) => {
+    const raw = row as unknown as Omit<Lead, "customers"> & {
+      customers:
+        | { id: string; name: string; phone: string | null; email: string | null }[]
+        | { id: string; name: string; phone: string | null; email: string | null }
+        | null;
+    };
+    return {
+      ...raw,
+      customers: Array.isArray(raw.customers)
+        ? (raw.customers[0] ?? null)
+        : raw.customers,
+    };
+  });
+
+  return { leads: mapped };
 }
 
 // ─── 3. UPDATE LEAD STATUS ────────────────────────────────────────────────────
