@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(dir \"C:\\\\Users\\\\User\\\\sabahcar-portal\" /b)",
-      "Bash(npx next build)"
+      "Bash(npx next build)",
+      "Bash(cd:*)"
     ]
   }
 }
