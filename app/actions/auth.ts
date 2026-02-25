@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createClient as createServiceClient } from "@supabase/supabase-js";
 
 export async function loginAction(
   formData: FormData
@@ -21,9 +22,19 @@ export async function loginAction(
     return { error: signInError.message };
   }
 
-  const { data: userData, error: userError } = await supabase
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const serviceClient = createServiceClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+
+  const { data: userData, error: userError } = await serviceClient
     .from("users")
     .select("role")
+    .eq("id", user!.id)
     .single();
 
   if (userError || !userData) {
