@@ -58,13 +58,19 @@ export async function createLead(
     ? user.id
     : null;
 
+  // Customers submitting their own inquiry must be linked by auth email
+  // so the bookings page (which queries WHERE email = auth email) can find them.
+  // Sales/agent create leads for other people — use the form email in that case.
+  const customerEmail =
+    creatorData?.role === "customer" ? user.email : email;
+
   // Step 1: Insert customer
   const { data: customer, error: customerError } = await serviceClient
     .from("customers")
     .insert({
       name,
       phone: phone || null,
-      email: email || null,
+      email: customerEmail || null,
       created_by: user.id,
     })
     .select("id")

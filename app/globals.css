@@ -19,6 +19,10 @@
   }
 }
 
+input, textarea, select {
+  color: #111827;
+}
+
 html {
   scroll-behavior: smooth;
 }

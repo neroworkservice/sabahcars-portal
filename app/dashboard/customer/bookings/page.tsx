@@ -76,17 +76,21 @@ export default async function CustomerBookingsPage() {
   if (userData?.role !== "customer")
     redirect(`/dashboard/${userData?.role ?? "customer"}`);
 
-  // Find the customers record linked to this user by email
-  const { data: customerRecord } = await serviceClient
+  // Fetch ALL customer records linked to this auth email.
+  // A customer can submit multiple inquiries, each creating a new customer row.
+  // Using maybeSingle() would silently fail when multiple rows exist, so we
+  // collect all matching IDs and query bookings with .in() instead.
+  const { data: customerRecords } = await serviceClient
     .from("customers")
     .select("id")
-    .eq("email", user.email!)
-    .maybeSingle();
+    .eq("email", user.email!);
+
+  const customerIds = (customerRecords ?? []).map((r) => r.id);
 
   let bookings: CustomerBooking[] = [];
   let fetchError: string | null = null;
 
-  if (customerRecord?.id) {
+  if (customerIds.length > 0) {
     const { data, error } = await serviceClient
       .from("bookings")
       .select(
@@ -106,7 +110,7 @@ export default async function CustomerBookingsPage() {
         )
       `
       )
-      .eq("customer_id", customerRecord.id)
+      .in("customer_id", customerIds)
       .order("created_at", { ascending: false });
 
     if (error) {
