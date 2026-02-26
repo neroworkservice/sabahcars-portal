@@ -394,7 +394,44 @@ export async function getBookings(): Promise<
   return { bookings: mapped };
 }
 
-// ─── 5. GET CUSTOMERS ─────────────────────────────────────────────────────────
+// ─── 5. UPDATE BOOKING STATUS ─────────────────────────────────────────────────
+// Admin only. Updates the status of any booking.
+
+export async function updateBookingStatus(
+  booking_id: string,
+  status: BookingStatus
+): Promise<{ success: true } | { error: string }> {
+  const authClient = await createClient();
+  const {
+    data: { user },
+  } = await authClient.auth.getUser();
+
+  if (!user) return { error: "Tidak dibenarkan." };
+
+  const serviceClient = getServiceClient();
+
+  const { data: userData, error: userError } = await serviceClient
+    .from("users")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (userError || !userData) return { error: "Gagal verify role." };
+
+  if (userData.role !== "admin")
+    return { error: "Admin sahaja boleh ubah status tempahan." };
+
+  const { error } = await serviceClient
+    .from("bookings")
+    .update({ status })
+    .eq("id", booking_id);
+
+  if (error) return { error: error.message };
+
+  return { success: true };
+}
+
+// ─── 6. GET CUSTOMERS ─────────────────────────────────────────────────────────
 // Fetch all customers for the quote form dropdown.
 
 export async function getCustomers(): Promise<
