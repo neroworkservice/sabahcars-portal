@@ -6,30 +6,13 @@ import { getBookings, type Booking, type BookingStatus } from "@/app/actions/boo
 
 // ─── STATUS CONFIG ─────────────────────────────────────────────────────────────
 
-const statusConfig: Record<
-  BookingStatus,
-  { label: string; color: string }
-> = {
-  pending: {
-    label: "Menunggu",
-    color: "bg-gray-100 text-gray-600",
-  },
-  confirmed: {
-    label: "Disahkan",
-    color: "bg-green-100 text-green-700",
-  },
-  active: {
-    label: "Aktif",
-    color: "bg-orange-100 text-orange-700",
-  },
-  completed: {
-    label: "Selesai",
-    color: "bg-teal-100 text-teal-700",
-  },
-  cancelled: {
-    label: "Dibatal",
-    color: "bg-red-100 text-red-700",
-  },
+const statusConfig: Record<BookingStatus, { label: string; color: string }> = {
+  draft: { label: "Draf", color: "bg-gray-100 text-gray-600" },
+  quoted: { label: "Sebut Harga", color: "bg-blue-100 text-blue-600" },
+  confirmed: { label: "Disahkan", color: "bg-green-100 text-green-600" },
+  ongoing: { label: "Sedang Berjalan", color: "bg-orange-100 text-orange-600" },
+  completed: { label: "Selesai", color: "bg-teal-100 text-teal-600" },
+  cancelled: { label: "Dibatal", color: "bg-red-100 text-red-600" },
 };
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
@@ -159,7 +142,7 @@ export default async function SalesQuotesPage() {
               <tbody className="divide-y divide-gray-50">
                 {bookings.map((booking) => {
                   const badge =
-                    statusConfig[booking.status] ?? statusConfig.pending;
+                    statusConfig[booking.status] ?? statusConfig.draft;
                   return (
                     <tr
                       key={booking.id}
