@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { updateLeadStatus, type Lead } from "@/app/actions/leads";
+import DeleteButton from "./DeleteButton";
 
 type LeadStatus = "new" | "contacted" | "quoted" | "converted" | "lost";
 
@@ -116,6 +117,9 @@ export default function LeadsTable({ leads }: { leads: Lead[] }) {
               <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
                 Status
               </th>
+              <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                Tindakan
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
@@ -157,6 +161,9 @@ export default function LeadsTable({ leads }: { leads: Lead[] }) {
                       </span>
                       <StatusCell lead={lead} />
                     </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <DeleteButton leadId={lead.id} status={lead.status} />
                   </td>
                 </tr>
               );

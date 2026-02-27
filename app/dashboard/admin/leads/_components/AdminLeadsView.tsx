@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { updateLeadStatus, assignLead, type Lead } from "@/app/actions/leads";
+import DeleteButton from "./DeleteButton";
 
 type LeadStatus = "new" | "contacted" | "quoted" | "converted" | "lost";
 
@@ -194,6 +195,9 @@ export default function AdminLeadsView({
               <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
                 Assign Kepada
               </th>
+              <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                Tindakan
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
@@ -237,6 +241,9 @@ export default function AdminLeadsView({
                   </td>
                   <td className="px-4 py-3">
                     <AssignCell lead={lead} salesUsers={salesUsers} />
+                  </td>
+                  <td className="px-4 py-3">
+                    <DeleteButton leadId={lead.id} />
                   </td>
                 </tr>
               );

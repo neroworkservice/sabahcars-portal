@@ -238,6 +238,62 @@ export async function assignLead(
   return { success: true };
 }
 
+// ─── 5. DELETE LEAD ───────────────────────────────────────────────────────────
+// Admin: boleh padam mana-mana lead | Sales: hanya lead assigned kepada dia & status = "new"
+export async function deleteLead(
+  lead_id: string
+): Promise<{ success: true } | { error: string }> {
+  const authClient = await createClient();
+  const {
+    data: { user },
+  } = await authClient.auth.getUser();
+
+  if (!user) return { error: "Tidak dibenarkan." };
+
+  const serviceClient = getServiceClient();
+
+  const { data: userData, error: userError } = await serviceClient
+    .from("users")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (userError || !userData) return { error: "Gagal verify role." };
+
+  if (userData.role === "admin") {
+    const { error } = await serviceClient
+      .from("leads")
+      .delete()
+      .eq("id", lead_id);
+
+    if (error) return { error: error.message };
+    return { success: true };
+  }
+
+  if (userData.role === "sales") {
+    // Verify lead belongs to this sales user and status is "new"
+    const { data: lead, error: leadError } = await serviceClient
+      .from("leads")
+      .select("assigned_to, status")
+      .eq("id", lead_id)
+      .single();
+
+    if (leadError || !lead) return { error: "Lead tidak dijumpai." };
+    if (lead.assigned_to !== user.id) return { error: "Tidak dibenarkan." };
+    if (lead.status !== "new") return { error: "Hanya lead berstatus 'Baru' boleh dipadam." };
+
+    const { error } = await serviceClient
+      .from("leads")
+      .delete()
+      .eq("id", lead_id);
+
+    if (error) return { error: error.message };
+    return { success: true };
+  }
+
+  return { error: "Tidak dibenarkan." };
+}
+
 // ─── TYPES ────────────────────────────────────────────────────────────────────
 export type Lead = {
   id: string;

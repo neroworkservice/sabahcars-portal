@@ -489,7 +489,65 @@ export async function confirmQuote(
   return { success: true };
 }
 
-// ─── 7. GET CUSTOMERS ─────────────────────────────────────────────────────────
+// ─── 7. DELETE BOOKING ────────────────────────────────────────────────────────
+// Admin: can delete any booking regardless of status.
+// Sales: can only delete own bookings (sales_id = user.id) where status = "draft".
+// All other roles: return error.
+
+export async function deleteBooking(
+  booking_id: string
+): Promise<{ success: true } | { error: string }> {
+  const authClient = await createClient();
+  const {
+    data: { user },
+  } = await authClient.auth.getUser();
+
+  if (!user) return { error: "Tidak dibenarkan." };
+
+  const serviceClient = getServiceClient();
+
+  const { data: userData, error: userError } = await serviceClient
+    .from("users")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (userError || !userData) return { error: "Gagal verify role." };
+
+  if (userData.role === "admin") {
+    const { error } = await serviceClient
+      .from("bookings")
+      .delete()
+      .eq("id", booking_id);
+    if (error) return { error: error.message };
+    return { success: true };
+  }
+
+  if (userData.role === "sales") {
+    // Verify ownership and draft status before deleting
+    const { data: booking, error: fetchError } = await serviceClient
+      .from("bookings")
+      .select("id, status, sales_id")
+      .eq("id", booking_id)
+      .eq("sales_id", user.id)
+      .single();
+
+    if (fetchError || !booking) return { error: "Tempahan tidak dijumpai." };
+    if (booking.status !== "draft")
+      return { error: "Hanya tempahan berstatus 'draf' boleh dipadam." };
+
+    const { error } = await serviceClient
+      .from("bookings")
+      .delete()
+      .eq("id", booking_id);
+    if (error) return { error: error.message };
+    return { success: true };
+  }
+
+  return { error: "Tidak dibenarkan." };
+}
+
+// ─── 8. GET CUSTOMERS ─────────────────────────────────────────────────────────
 // Fetch all customers for the quote form dropdown.
 
 export async function getCustomers(): Promise<
