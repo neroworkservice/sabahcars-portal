@@ -21,7 +21,6 @@ const roleMenus: Record<string, NavItem[]> = {
     { label: "Dashboard", href: "/dashboard/sales" },
     { label: "Leads", href: "/dashboard/sales/leads" },
     { label: "Sebut Harga", href: "/dashboard/sales/quotes" },
-    { label: "Tempahan", href: "/dashboard/sales/bookings" },
     { label: "Pelanggan", href: "/dashboard/sales/customers" },
   ],
   agent: [
@@ -45,7 +44,7 @@ const roleMenus: Record<string, NavItem[]> = {
     { label: "Dashboard", href: "/dashboard/customer" },
     { label: "Hantar Inquiry", href: "/dashboard/customer/inquiry" },
     { label: "Tempahan Saya", href: "/dashboard/customer/bookings" },
-    { label: "Minta Sebut Harga", href: "/dashboard/customer/quote" },
+    { label: "Sebut Harga Saya", href: "/dashboard/customer/quote" },
     { label: "Profil", href: "/dashboard/customer/profile" },
   ],
 };

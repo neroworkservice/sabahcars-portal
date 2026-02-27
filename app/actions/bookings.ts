@@ -431,7 +431,65 @@ export async function updateBookingStatus(
   return { success: true };
 }
 
-// ─── 6. GET CUSTOMERS ─────────────────────────────────────────────────────────
+// ─── 6. CONFIRM QUOTE ────────────────────────────────────────────────────────
+// Customer only. Confirms a "quoted" booking by updating status to "confirmed".
+// Verifies the booking belongs to one of the customer's own records (by email).
+
+export async function confirmQuote(
+  booking_id: string
+): Promise<{ success: true } | { error: string }> {
+  const authClient = await createClient();
+  const {
+    data: { user },
+  } = await authClient.auth.getUser();
+
+  if (!user) return { error: "Tidak dibenarkan." };
+
+  const serviceClient = getServiceClient();
+
+  const { data: userData } = await serviceClient
+    .from("users")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (userData?.role !== "customer")
+    return { error: "Pelanggan sahaja boleh mengesahkan quote." };
+
+  // Collect all customer records linked to this auth email
+  const { data: customerRecords } = await serviceClient
+    .from("customers")
+    .select("id")
+    .eq("email", user.email!);
+
+  const customerIds = (customerRecords ?? []).map((r) => r.id);
+
+  if (customerIds.length === 0)
+    return { error: "Rekod pelanggan tidak dijumpai." };
+
+  // Verify booking belongs to this customer and is in "quoted" status
+  const { data: booking } = await serviceClient
+    .from("bookings")
+    .select("id, status")
+    .eq("id", booking_id)
+    .in("customer_id", customerIds)
+    .single();
+
+  if (!booking) return { error: "Tempahan tidak dijumpai." };
+  if (booking.status !== "quoted")
+    return { error: "Hanya quote boleh disahkan." };
+
+  const { error } = await serviceClient
+    .from("bookings")
+    .update({ status: "confirmed" })
+    .eq("id", booking_id);
+
+  if (error) return { error: error.message };
+
+  return { success: true };
+}
+
+// ─── 7. GET CUSTOMERS ─────────────────────────────────────────────────────────
 // Fetch all customers for the quote form dropdown.
 
 export async function getCustomers(): Promise<
