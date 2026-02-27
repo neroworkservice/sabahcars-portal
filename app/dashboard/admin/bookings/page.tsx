@@ -4,6 +4,7 @@ import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { getBookings, type Booking, type BookingStatus } from "@/app/actions/bookings";
 import StatusSelect from "./_components/StatusSelect";
 import DeleteButton from "./_components/DeleteButton";
+import RecordPaymentButton from "./_components/RecordPaymentButton";
 
 // ─── STATUS CONFIG ─────────────────────────────────────────────────────────────
 
@@ -199,7 +200,15 @@ export default async function AdminBookingsPage() {
                         </div>
                       </td>
                       <td className="px-4 py-3">
-                        <DeleteButton bookingId={booking.id} />
+                        <div className="flex items-center gap-2">
+                          {!["ongoing", "completed", "cancelled"].includes(booking.status) && (
+                            <RecordPaymentButton
+                              bookingId={booking.id}
+                              totalAmount={booking.total_amount}
+                            />
+                          )}
+                          <DeleteButton bookingId={booking.id} />
+                        </div>
                       </td>
                     </tr>
                   );

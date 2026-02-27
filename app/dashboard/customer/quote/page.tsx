@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { type BookingStatus } from "@/app/actions/bookings";
 import ConfirmButton from "./_components/ConfirmButton";
+import PayOnlineButton from "../bookings/_components/PayOnlineButton";
 
 // ─── STATUS CONFIG ─────────────────────────────────────────────────────────────
 
@@ -313,6 +314,74 @@ export default async function CustomerQuotePage() {
                 {quote.status === "quoted" && (
                   <div className="mt-4">
                     <ConfirmButton bookingId={quote.id} />
+                  </div>
+                )}
+
+                {/* Payment section — confirmed */}
+                {quote.status === "confirmed" && (
+                  <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded-xl p-4">
+                    <p className="text-sm font-semibold text-yellow-800 mb-1">
+                      Cara Pembayaran
+                    </p>
+                    <p className="text-xs text-yellow-700 mb-3">
+                      Sila buat pembayaran dan hubungi kami via WhatsApp
+                    </p>
+                    <p className="text-sm font-bold text-gray-900 mb-3">
+                      Jumlah: {formatRM(quote.total_amount)}
+                    </p>
+
+                    {/* Bank Transfer */}
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                      Pindahan Bank
+                    </p>
+                    <div className="bg-white rounded-lg px-3 py-2 text-xs text-gray-700 space-y-1 mb-3">
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Bank</span>
+                        <span className="font-medium">Maybank</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Nama</span>
+                        <span className="font-medium">SabahCar Rental</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">No. Akaun</span>
+                        <span className="font-medium">1234567890</span>
+                      </div>
+                    </div>
+
+                    {/* TNG */}
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                      Touch &apos;n Go (TNG)
+                    </p>
+                    <div className="bg-white rounded-lg px-3 py-2 text-xs text-gray-700 mb-4">
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">No. TNG</span>
+                        <span className="font-medium">013-2291201</span>
+                      </div>
+                    </div>
+
+                    {/* Pay online button */}
+                    <PayOnlineButton bookingId={quote.id} />
+
+                    {/* Separator */}
+                    <div className="flex items-center gap-2 my-3">
+                      <div className="flex-1 border-t border-yellow-200" />
+                      <span className="text-xs text-yellow-600 font-medium">— ATAU —</span>
+                      <div className="flex-1 border-t border-yellow-200" />
+                    </div>
+
+                    {/* WhatsApp button */}
+                    <a
+                      href={`https://wa.me/60132291201?text=Saya%20mahu%20membuat%20pembayaran%20untuk%20tempahan%20${quote.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-2 w-full bg-green-500 hover:bg-green-600 text-white text-sm font-semibold py-2.5 rounded-lg transition-colors"
+                    >
+                      Hubungi via WhatsApp
+                    </a>
+                    <p className="mt-2 text-xs text-yellow-700 text-center">
+                      Sertakan nombor tempahan dan resit pembayaran dalam WhatsApp anda
+                    </p>
                   </div>
                 )}
               </div>
